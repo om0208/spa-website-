@@ -35,7 +35,7 @@ export default function BookingWidget({ serviceId, serviceName }: BookingWidgetP
     try {
       console.log('Submitting booking:', formData)
       
-      const response = await fetch('/api/booking', {
+      const response = await fetch('/api/booking-test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
