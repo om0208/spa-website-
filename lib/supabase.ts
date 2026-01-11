@@ -1,51 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://demo.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'demo_anon_key'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Create a mock client for demo purposes if no real credentials are provided
-const isDemoMode = supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo_anon_key'
-
-export const supabase = isDemoMode 
-  ? createMockSupabaseClient() 
-  : createClient(supabaseUrl, supabaseAnonKey)
-
-// Mock Supabase client for demo purposes
-function createMockSupabaseClient() {
-  return {
-    from: (table: string) => ({
-      select: () => ({
-        order: () => ({
-          then: (callback: any) => callback({ data: [], error: null })
-        }),
-        then: (callback: any) => callback({ data: [], error: null })
-      }),
-      insert: () => ({
-        select: () => ({
-          then: (callback: any) => callback({ 
-            data: [{ id: 'demo-id', created_at: new Date().toISOString() }], 
-            error: null 
-          })
-        })
-      }),
-      update: () => ({
-        eq: () => ({
-          select: () => ({
-            then: (callback: any) => callback({ 
-              data: [{ id: 'demo-id', updated_at: new Date().toISOString() }], 
-              error: null 
-            })
-          })
-        })
-      }),
-      delete: () => ({
-        eq: () => ({
-          then: (callback: any) => callback({ error: null })
-        })
-      })
-    })
-  } as any
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables')
+  console.log('SUPABASE_URL exists:', !!supabaseUrl)
+  console.log('SUPABASE_ANON_KEY exists:', !!supabaseAnonKey)
 }
+
+export const supabase = createClient(
+  supabaseUrl || 'https://demo.supabase.co',
+  supabaseAnonKey || 'demo_key'
+)
 
 export type Database = {
   public: {
