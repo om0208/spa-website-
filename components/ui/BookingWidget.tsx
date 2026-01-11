@@ -33,6 +33,8 @@ export default function BookingWidget({ serviceId, serviceName }: BookingWidgetP
     setMessage('')
 
     try {
+      console.log('Submitting booking:', formData)
+      
       const response = await fetch('/api/booking', {
         method: 'POST',
         headers: {
@@ -40,6 +42,9 @@ export default function BookingWidget({ serviceId, serviceName }: BookingWidgetP
         },
         body: JSON.stringify(formData),
       })
+
+      const result = await response.json()
+      console.log('Booking response:', result)
 
       if (response.ok) {
         setMessage('Booking request submitted successfully! We will contact you to confirm.')
@@ -53,9 +58,10 @@ export default function BookingWidget({ serviceId, serviceName }: BookingWidgetP
           notes: ''
         })
       } else {
-        setMessage('Failed to submit booking. Please try again.')
+        setMessage(result.error || 'Failed to submit booking. Please try again.')
       }
     } catch (error) {
+      console.error('Booking error:', error)
       setMessage('An error occurred. Please try again.')
     } finally {
       setIsSubmitting(false)

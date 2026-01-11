@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('Received booking request:', body)
+    
     const {
       serviceId,
       customerName,
@@ -16,6 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!customerName || !customerEmail || !customerPhone || !bookingDate || !bookingTime) {
+      console.log('Missing required fields:', { customerName, customerEmail, customerPhone, bookingDate, bookingTime })
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -23,29 +26,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert booking into database
+    const bookingData = {
+      service_id: serviceId || null,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      booking_date: bookingDate,
+      booking_time: bookingTime,
+      status: 'pending',
+      notes: notes || null
+    }
+
+    console.log('Inserting booking data:', bookingData)
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert([
-        {
-          service_id: serviceId || null,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          customer_phone: customerPhone,
-          booking_date: bookingDate,
-          booking_time: bookingTime,
-          status: 'pending',
-          notes: notes || null
-        }
-      ])
+      .insert([bookingData])
       .select()
 
     if (error) {
       console.error('Supabase error:', error)
       return NextResponse.json(
-        { error: 'Failed to create booking' },
+        { error: 'Failed to create booking', details: error.message },
         { status: 500 }
       )
     }
+
+    console.log('Booking created successfully:', data)
 
     // Here you could add email notification logic
     // await sendBookingConfirmationEmail(customerEmail, data[0])
@@ -61,7 +68,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
